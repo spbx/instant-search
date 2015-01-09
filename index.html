@@ -1,0 +1,50 @@
+<p>Search <input type="text" id="query" /></p>
+<p>
+	<input type="radio" name="match_type" value="0" /> Begins with |
+	<input type="radio" name="match_type" value="1" /> Ends with |
+	<input type="radio" name="match_type" value="2" checked /> Contains 
+	</p>
+
+	<hr/>
+
+	<ul id="results"><ul>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/0.7.2/mustache.min.js"></script>
+<script type="mustache/x-tmpl" id="names_tmpl">
+	{{#names}}
+	<li>{{name}}</li>
+	{{/names}}
+	{{^names}}
+	<li><em>No matches found = (</em></li>
+	{{/names}}
+</script>
+
+<script>
+
+$("#query").keyup(function(){
+	var q = $(this).val();
+	var match_type = $("input[type=radio]:checked").val();
+	var data = {query: q, match_type: match_type};
+
+	if (q.length == 0 || q == " ")
+		return false;
+
+	$.ajax({
+		url: "/instant-search/instant-search.php",
+		data: data,
+		type: "post",
+		dataType: "json",
+		success: function(res) {
+			var tmpl = $("#names_tmpl").html();
+			var html = Mustache.to_html(tmpl, res);
+		
+		$("#results").html(html);
+		}
+	  });
+
+    });
+
+$("input[type=radio]").change(function(){
+	$("query").triger("keyup");
+});
